@@ -1,5 +1,5 @@
 <fieldset class="big">
-  <legend><b>.: Lastheard Log :.</b></legend>
+  <legend><b>.: Global Last Heard :.</b></legend>
 {% if _table|length > 0 %}
   <table class="log">
     <tr>
@@ -10,7 +10,7 @@
       <th>TG#</th>
       <th>TG Name</th>
       <th>TX (s)</th>
-      <th>System</th>
+      
     </tr>
     {% for itm in _table %}
     <tr>
@@ -26,7 +26,7 @@
       <td class="txt-b5651d"><b>{{ itm[4] }}</b></td>
       <td class="txt-green"><b>{{ '' if not itm[5] else itm[5]|safe }}</b></td>
       <td {{ 'class="bkgnd-1d1"'|safe if not itm[1] else '' }}>{{ 'DATA' if not itm[1] else itm[1]|int }}</td>
-      <td>{{ itm[3] }}</td>
+      
     </tr>
     {% endfor %}
   </table>

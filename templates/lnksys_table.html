@@ -1,5 +1,5 @@
 <fieldset class="big">
-  <legend><b>.: Masters status :.</b></legend>
+  <legend><b>.: Linked Systems :.</b></legend>
 {% if _table['MASTERS']|length >0 %}
   <table class="lnksys">
     <tr class="theme_color">
@@ -21,8 +21,8 @@
     <tr>
       <td rowspan="2">
         <div class="tooltip">
-          <span class="txt-0065ff"><b>{{ _cdata['CALLSIGN']}}</b></span><span class="fnt-8pt"> (Id: {{ _client }})</span>
-          <div class="tooltiptext c2s-pos1">
+          <a target="_blank" href="https://qrz.com/db/{{ _cdata['CALLSIGN'] }}"><span class="txt-0065ff"><b>{{ _cdata['CALLSIGN'] }}</b></span></a><span class="fnt-8pt"> (Id: {{ _client }})</span>
+	  <div class="tooltiptext c2s-pos1">
             {% if _cdata['RX_FREQ'] == 'N/A' and _cdata['TX_FREQ'] == 'N/A' %}
             <b>Type: <span class="txt-yellow">IP Network</span></b><br>
             {% else %} 
@@ -56,7 +56,7 @@
 </fieldset>
 
 <fieldset class="big">
-  <legend><b>.: Peers status :.</b></legend>
+  <legend><b>.: Services :.</b></legend>
   {% if _table['PEERS']|length >0 %}
   <table class="lnksys">
     <tr class="theme_color">
