@@ -1,58 +1,74 @@
-
-<fieldset class="med">
+<fieldset class="big">
   <legend><b>.: Server Activity :.</b></legend>
-{% if _table['MASTERS']|length >0 %}
+
+{% if _table['MASTERS']|length > 0 or _table['PEERS']|length > 0 or _table['OPENBRIDGES']|length > 0 %}
   <table class="active-qso">
     <tr><th>Active QSO's</th></tr>
     <tr>
       <td>
+        {% set active = namespace(value=false) %}
+
+        {# --- MASTERS --- #}
         {% for _master in _table['MASTERS'] %}
-        {% for _client, _cdata in _table['MASTERS'][_master]['PEERS'].items() %}
-        {% if _cdata[1]['TS'] == True or _cdata[2]['TS'] == True %}
-        {% if _cdata[1]['TRX'] == "RX" %}
-        &nbsp;[<span class="txt-008000">M</span>:&nbsp;<span class="txt-0065ff">{{ _cdata[1]['CALL']|safe }}</span>
-        &nbsp;<span class="txt-red">>></span>&nbsp;<span class="txt-b5651d">{{ _cdata[1]['TG']|safe }}</span>]&nbsp;
-        {% endif %}
-        {% if _cdata[2]['TRX'] == "RX" %}
-        &nbsp;[<span class="txt-008000">M</span>:&nbsp;<span class="txt-0065ff">{{ _cdata[2]['CALL']|safe}}</span>
-        &nbsp;<span class="txt-red">>></span>&nbsp;<span class="txt-b5651d">{{_cdata[2]['TG']|safe}}</span>]&nbsp;
-        {% endif %}
-        {% endif %}
-        {% endfor %}
+          {% for _client, _cdata in _table['MASTERS'][_master]['PEERS'].items() %}
+            {% if _cdata[1]['TS'] or _cdata[2]['TS'] %}
+              {% if _cdata[1]['TRX'] == "RX" %}
+                {% set active.value = true %}
+                &nbsp;[<span class="txt-008000">M</span>: <span class="txt-0065ff">{{ _cdata[1]['CALL']|safe }}</span>
+                <span class="txt-red">>></span> <span class="txt-b5651d">{{ _cdata[1]['TG']|safe }}</span>]&nbsp;
+              {% endif %}
+              {% if _cdata[2]['TRX'] == "RX" %}
+                {% set active.value = true %}
+                &nbsp;[<span class="txt-008000">M</span>: <span class="txt-0065ff">{{ _cdata[2]['CALL']|safe }}</span>
+                <span class="txt-red">>></span> <span class="txt-b5651d">{{ _cdata[2]['TG']|safe }}</span>]&nbsp;
+              {% endif %}
+            {% endif %}
+          {% endfor %}
         {% endfor %}
 
-        {% for _peer, _pdata  in _table['PEERS'].items() %}
-        {% if _pdata[1]['TS'] == True or _pdata[2]['TS'] == True %}
-        {% if _pdata[1]['TRX'] == "RX" %}
-        &nbsp;[<span class="txt-008000">M</span>:&nbsp;<span class="txt-0065ff">{{ _pdata[1]['CALL']|safe }}</span>
-        &nbsp;<span class="txt-red">>></span>&nbsp;<span class="txt-b5651d">{{ _pdata[1]['TG']|safe }}</span>]&nbsp;
-        {% endif %}
-        {% if _pdata[2]['TRX'] == "RX" %}
-        &nbsp;[<span class="txt-008000">M</span>:&nbsp;<span class="txt-0065ff">{{ _pdata[2]['CALL']|safe }}</span>
-        &nbsp;<span class="txt-red">>></span>&nbsp;<span class="txt-b5651d">{{ _pdata[2]['TG']|safe }}</span>]&nbsp;
-        {% endif %}
-        {% endif %}
+        {# --- PEERS --- #}
+        {% for _peer, _pdata in _table['PEERS'].items() %}
+          {% if _pdata[1]['TS'] or _pdata[2]['TS'] %}
+            {% if _pdata[1]['TRX'] == "RX" %}
+              {% set active.value = true %}
+              &nbsp;[<span class="txt-008000">M</span>: <span class="txt-0065ff">{{ _pdata[1]['CALL']|safe }}</span>
+              <span class="txt-red">>></span> <span class="txt-b5651d">{{ _pdata[1]['TG']|safe }}</span>]&nbsp;
+            {% endif %}
+            {% if _pdata[2]['TRX'] == "RX" %}
+              {% set active.value = true %}
+              &nbsp;[<span class="txt-008000">M</span>: <span class="txt-0065ff">{{ _pdata[2]['CALL']|safe }}</span>
+              <span class="txt-red">>></span> <span class="txt-b5651d">{{ _pdata[2]['TG']|safe }}</span>]&nbsp;
+            {% endif %}
+          {% endif %}
         {% endfor %}
-        {% if _table['OPENBRIDGES']|length >0 %}
+
+        {# --- OPENBRIDGES --- #}
         {% for _openbridge in _table['OPENBRIDGES'] %}
-        {% set rx = namespace(value=0) %}
-        {% if _table['OPENBRIDGES'][_openbridge]['STREAMS']|length >0 %}
-        {% for entry in _table['OPENBRIDGES'][_openbridge]['STREAMS'] if _table['OPENBRIDGES'][_openbridge]['STREAMS'][entry][0]=='RX' %}
-          {% set rx.value=1 %}
-          {% endfor %}
-          {% if rx.value == 1 %}
-          {% for entry in _table['OPENBRIDGES'][_openbridge]['STREAMS']  if _table['OPENBRIDGES'][_openbridge]['STREAMS'][entry][0] == 'RX' %}&nbsp;[<span class="txt-008000">O</span>:&nbsp;<span class="txt-0065ff">{{ _table['OPENBRIDGES'][_openbridge]['STREAMS'][entry][1]}}</span>&nbsp;<span class="txt-red">>></span>&nbsp;<span class="txt-b5651d">TG&nbsp;{{ _table['OPENBRIDGES'][_openbridge]['STREAMS'][entry][2]}}</span>]&nbsp; {% endfor %}
+          {% if _table['OPENBRIDGES'][_openbridge]['STREAMS']|length > 0 %}
+            {% for entry, data in _table['OPENBRIDGES'][_openbridge]['STREAMS'].items() %}
+              {% if data[0] == 'RX' %}
+                {% set active.value = true %}
+                &nbsp;[<span class="txt-008000">O</span>: <span class="txt-0065ff">{{ data[1] }}</span>
+                <span class="txt-red">>></span> <span class="txt-b5651d">TG {{ data[2] }}</span>]&nbsp;
+              {% endif %}
+            {% endfor %}
+          {% endif %}
+        {% endfor %}
+
+        {# --- MENSAJE FINAL SI NO HAY ACTIVIDAD --- #}
+        {% if not active.value %}
+          <div style="text-align:center; min-height:25px; margin-top:8px; padding:8px; background:#f6f6f6; border-radius:8px; color:#666; font-style:italic;">
+            📡 No active QSO at the moment
+          </div>
         {% endif %}
-    {% endif %}
-    {% endfor %}
       </td>
     </tr>
-{% endif %}
   </table>
 {% else %}
   <table class="w4data"><tr><td><b>Waiting for data from the Server...</b></td></tr></table>
 {% endif %}
 </fieldset>
+
 
 {% if _table['SETUP']['LASTHEARD'] == True %}
 <fieldset class="big">
@@ -66,7 +82,7 @@
       <th>TG#</th>
       <th>TG Name</th>
       <th>TX (s)</th>
-      <th>System</th>
+      <!-- <th>System</th> -->
     </tr>
   {% for itm in lastheard %}
     <tr>
@@ -82,7 +98,7 @@
       <td class="txt-b5651d"><b>{{ itm[4] }}</b></td>
       <td class="txt-green"><b>{{ '' if not itm[5] else itm[5]|safe }}</b></td>
       <td {{ 'class="bkgnd-1d1"'|safe if not itm[1] else '' }}>{{ 'DATA' if not itm[1] else itm[1]|int }}</td>
-      <td>{{ itm[3] }}</td>
+      <!-- <td>{{ itm[3] }}</td> --> 
     </tr>
   {% endfor %}
   </table>
